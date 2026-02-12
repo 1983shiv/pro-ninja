@@ -1,19 +1,27 @@
 import 'dotenv/config'
-import { prisma } from './lib/prisma'
+import { prisma } from './lib/prisma.js'
 
 async function testConnection() {
   try {
     await prisma.$connect()
     console.log('✅ Successfully connected to MongoDB!')
     
-    // Test creating a user
-    const user = await prisma.user.create({
-      data: {
-        email: 'test@example.com',
-        name: 'Test User'
-      }
+    // Test creating a user or fetch if exists
+    let user = await prisma.user.findUnique({
+      where: { email: 'test@example.com' }
     })
-    console.log('✅ Successfully created test user:', user)
+    
+    if (user) {
+      console.log('✅ Test user already exists:', user)
+    } else {
+      user = await prisma.user.create({
+        data: {
+          email: 'test@example.com',
+          name: 'Test User'
+        }
+      })
+      console.log('✅ Successfully created test user:', user)
+    }
     
     // Fetch all users
     const users = await prisma.user.findMany()
