@@ -50,6 +50,20 @@ export async function getUsersCollection(): Promise<Collection<User>> {
   return db.collection<User>(collections.users);
 }
 
+export async function getUserById (id: string){
+  const db = await getDb();
+  const usersCollection = db.collection<User>(collections.users);
+  const user = await usersCollection.findOne({ _id: id });
+  return user;
+}
+
+export async function getAccountByUserId(id: string){
+  const db = await getDb();
+  const accountsCollection = db.collection<Account>(collections.accounts);
+  const account = await accountsCollection.findOne({ userId: id });
+  return account;
+}
+
 export async function getAccountsCollection(): Promise<Collection<Account>> {
   const db = await getDb();
   return db.collection<Account>(collections.accounts);

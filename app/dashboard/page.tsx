@@ -1,6 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSession, signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,15 +22,21 @@ interface License {
 }
 
 export default function DashboardPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [licenses, setLicenses] = useState<License[]>([]);
   const [loading, setLoading] = useState(true);
   const [testLicenseKey, setTestLicenseKey] = useState('');
   const [validationResult, setValidationResult] = useState<any>(null);
 
   useEffect(() => {
-    // Fetch user's licenses (placeholder - would need auth)
-    setLoading(false);
-  }, []);
+    if (status === 'unauthenticated') {
+      router.push('/auth/signin');
+    }
+    if (status === 'authenticated') {
+      setLoading(false);
+    }
+  }, [status, router]);
 
   const testLicenseValidation = async () => {
     try {
@@ -44,13 +54,62 @@ export default function DashboardPage() {
     }
   };
 
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: '/' });
+  };
+
+  if (status === 'loading') {
+    return (
+      <div className="container mx-auto py-10 flex items-center justify-center min-h-screen">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return null;
+  }
+
   return (
-    <div className="container p-20 mx-auto py-10">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Dashboard</h1>
-        <p className="text-muted-foreground">
+    <div className="container mx-auto p-20">
+      {/* User Info Header */}
+      <div className="mb-8 flex justify-between items-center">
+        <div>
+          <h1 className="text-4xl font-bold mb-2">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Welcome back, {session.user?.name || session.user?.email}!
+          </p>
+        </div>
+        <Button variant="outline" onClick={handleSignOut}>
+          Sign Out
+        </Button>
+      </div>
+
+      {/* User Profile Card */}
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Your Profile</CardTitle>
+          <CardDescription>Your account information</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <div className="flex items-center space-x-4">
+            {session.user?.image && (
+              <Image src={session.user.image} alt='"Profile Image' width='16' height='16' className='w-16 h-16 rounded-full' />
+            )}
+            <div>
+              <p className="font-semibold">{session.user?.name}</p>
+              <p className="text-sm text-muted-foreground">{session.user?.email}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Role: {(session.user as any)?.role || 'user'}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+        <div>
+        <h2 className="text-2xl mb-8">
           Manage your licenses and track your usage
-        </p>
+        </h2>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
