@@ -20,12 +20,14 @@ export function AuthLayoutSplit({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Logo */}
+        <Link href="/">
         <div className="relative z-10 flex items-center space-x-3 shrink-0">
           <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center border border-white/30">
             <Brain className="text-white w-6 h-6" />
           </div>
           <span className="text-2xl font-bold tracking-tight">AI ReviewSense</span>
         </div>
+        </Link>
 
         {/* Center Mockup */}
         <div className="relative z-10 flex-1 flex items-center justify-center my-6 min-h-0">

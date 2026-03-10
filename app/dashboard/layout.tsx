@@ -21,7 +21,7 @@ export default function DashboardLayout({
   // Redirect to signin if not authenticated
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/signin');
+      router.push('/login');
     }
   }, [status, router]);
 

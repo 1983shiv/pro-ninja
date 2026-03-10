@@ -50,12 +50,12 @@ export function Navigation() {
               </div>
             ) : (
               <>
-                <Link href="/auth/signin">
+                <Link href="/login">
                   <Button variant="outline" size="sm">
                     Sign In
                   </Button>
                 </Link>
-                <Link href="/auth/register">
+                <Link href="/register">
                   <Button size="sm">
                     Get Started
                   </Button>

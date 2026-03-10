@@ -2,7 +2,7 @@
 
 import { Key, Star, Gauge, Calendar, TrendingUp, ArrowRight, Copy, MoreHorizontal, Plus, Download, HeadphonesIcon } from 'lucide-react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+
 
 interface StatCardProps {
   title: string;
@@ -15,6 +15,7 @@ interface StatCardProps {
 }
 
 function StatCard({ title, value, subtitle, icon, badge, progress, iconBg }: StatCardProps) {
+  
   return (
     <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex justify-between items-start mb-4">

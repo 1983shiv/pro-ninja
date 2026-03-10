@@ -132,7 +132,7 @@ export function MarketingHeader() {
           ) : (
             <>
               <Button variant="ghost" asChild className="text-slate-700 hover:text-slate-900">
-                <Link href="/signin">Sign In</Link>
+                <Link href="/login">Sign In</Link>
               </Button>
               <Button asChild className="ai-gradient-bg text-white hover:shadow-lg hover:scale-[1.02] transition-all">
                 <Link href="/register">Get Started</Link>
@@ -236,7 +236,7 @@ export function MarketingHeader() {
               ) : (
                 <>
                   <Button variant="outline" asChild className="w-full">
-                    <Link href="/signin">Sign In</Link>
+                    <Link href="/login">Sign In</Link>
                   </Button>
                   <Button asChild className="w-full ai-gradient-bg text-white">
                     <Link href="/register">Get Started</Link>

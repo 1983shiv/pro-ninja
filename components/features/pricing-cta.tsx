@@ -24,7 +24,7 @@ export function PricingCTA() {
               size="lg" 
               className="bg-white text-indigo-600 hover:bg-gray-50 text-base font-bold shadow-lg w-full sm:w-auto"
             >
-              <Link href="/auth/register">Start Free Trial</Link>
+              <Link href="/register">Start Free Trial</Link>
             </Button>
             <Button 
               asChild 

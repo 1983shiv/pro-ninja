@@ -1,10 +1,11 @@
-import { db } from "@/lib/db";
+import { TwoFactorToken, collections } from '@/drizzle/schema';
+import { getDb } from '@/drizzle/db';
 
 export const getTwoFactorTokenByToken = async (token: string) => {
   try {
-    const twoFactorToken = await db.twoFactorToken.findUnique({
-      where: { token }
-    });
+    const db = await getDb();
+    const twoFactorTokensCollection = db.collection<TwoFactorToken>(collections.twoFactorTokens);
+    const twoFactorToken = await twoFactorTokensCollection.findOne({ token });
 
     return twoFactorToken;
   } catch {
@@ -14,9 +15,9 @@ export const getTwoFactorTokenByToken = async (token: string) => {
 
 export const getTwoFactorTokenByEmail = async (email: string) => {
   try {
-    const twoFactorToken = await db.twoFactorToken.findFirst({
-      where: { email }
-    });
+    const db = await getDb();
+    const twoFactorTokensCollection = db.collection<TwoFactorToken>(collections.twoFactorTokens);
+    const twoFactorToken = await twoFactorTokensCollection.findOne({ email });
 
     return twoFactorToken;
   } catch {

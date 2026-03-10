@@ -35,7 +35,7 @@ export function HeroSection() {
           size="lg"
           className="w-full sm:w-auto px-8 py-6 text-lg ai-gradient-bg text-white hover:shadow-lg hover:shadow-indigo-500/25 hover:scale-[1.02] transition-all"
         >
-          <Link href="/auth/register" className="flex items-center gap-2">
+          <Link href="/register" className="flex items-center gap-2">
             Start Free Trial
             <ArrowRight className="w-5 h-5" />
           </Link>

@@ -35,7 +35,7 @@ export function PricingCards({ isYearly }: PricingCardsProps) {
         </div>
         
         <Link
-          href="/auth/register"
+          href="/register"
           className="block w-full py-3 px-4 bg-white border-2 border-slate-200 text-slate-700 font-medium rounded-lg text-center hover:bg-slate-50 hover:border-slate-300 transition-all mb-8"
         >
           Get Started
@@ -92,7 +92,7 @@ export function PricingCards({ isYearly }: PricingCardsProps) {
         </div>
         
         <Link
-          href="/auth/register"
+          href="/register"
           className="block w-full py-3 px-4 ai-gradient-bg text-white font-medium rounded-lg text-center shadow-md hover:shadow-lg hover:opacity-95 transition-all mb-4"
         >
           Start Free Trial
@@ -151,7 +151,7 @@ export function PricingCards({ isYearly }: PricingCardsProps) {
         </div>
         
         <Link
-          href="/auth/register"
+          href="/register"
           className="block w-full py-3 px-4 bg-indigo-50 text-indigo-700 font-medium rounded-lg text-center hover:bg-indigo-100 transition-all mb-8"
         >
           Start Free Trial

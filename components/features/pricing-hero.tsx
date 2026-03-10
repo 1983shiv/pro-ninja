@@ -39,7 +39,7 @@ export function PricingHero() {
             size="lg"
             className="ai-gradient-bg text-white text-base font-bold shadow-lg shadow-indigo-500/20 hover:shadow-xl hover:scale-[1.02] transition-all"
           >
-            <Link href="/auth/register">
+            <Link href="/register">
               Get Started Free
             </Link>
           </Button>

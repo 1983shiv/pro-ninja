@@ -7,7 +7,7 @@ import {
   License,
   Download,
   Notification,
-  collections,
+  collections
 } from './schema';
 
 if (!process.env.DATABASE_URL) {
@@ -15,7 +15,20 @@ if (!process.env.DATABASE_URL) {
 }
 
 const uri = process.env.DATABASE_URL;
-const options = {};
+
+// MongoDB connection options with SSL/TLS support
+const options = {
+  tls: true,
+  tlsAllowInvalidCertificates: false,
+  tlsAllowInvalidHostnames: false,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+  maxPoolSize: 10,
+  minPoolSize: 2,
+  retryWrites: true,
+  retryReads: true,
+  w: 'majority',
+};
 
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
@@ -28,20 +41,54 @@ if (process.env.NODE_ENV === 'development') {
 
   if (!globalWithMongo._mongoClientPromise) {
     client = new MongoClient(uri, options);
-    globalWithMongo._mongoClientPromise = client.connect();
+    globalWithMongo._mongoClientPromise = client.connect()
+      .then((client) => {
+        console.log('✅ MongoDB connected successfully');
+        return client;
+      })
+      .catch((error) => {
+        console.error('❌ MongoDB connection failed:', error.message);
+        throw error;
+      });
   }
   
   clientPromise = globalWithMongo._mongoClientPromise;
 } else {
   // In production mode, create a new client
   client = new MongoClient(uri, options);
-  clientPromise = client.connect();
+  clientPromise = client.connect()
+    .then((client) => {
+      console.log('✅ MongoDB connected successfully');
+      return client;
+    })
+    .catch((error) => {
+      console.error('❌ MongoDB connection failed:', error.message);
+      throw error;
+    });
 }
 
 // Database instance
 export async function getDb(): Promise<Db> {
-  const client = await clientPromise;
-  return client.db();
+  try {
+    const client = await clientPromise;
+    return client.db();
+  } catch (error: any) {
+    console.error('Failed to get database instance:', error.message);
+    
+    // Provide helpful error messages
+    if (error.message?.includes('SSL') || error.message?.includes('TLS')) {
+      console.error('💡 SSL/TLS Error: Check your MongoDB connection string and ensure it includes proper SSL parameters');
+      console.error('💡 For MongoDB Atlas, ensure your connection string starts with: mongodb+srv://');
+    } else if (error.message?.includes('ENOTFOUND')) {
+      console.error('💡 DNS Error: Check your MongoDB hostname is correct');
+    } else if (error.message?.includes('authentication failed')) {
+      console.error('💡 Auth Error: Check your MongoDB username and password');
+    } else if (error.message?.includes('not authorized')) {
+      console.error('💡 Authorization Error: Check your MongoDB user permissions');
+    }
+    
+    throw error;
+  }
 }
 
 // Collection getters
@@ -60,6 +107,7 @@ export async function getUserById (id: string){
 export async function getAccountByUserId(id: string){
   const db = await getDb();
   const accountsCollection = db.collection<Account>(collections.accounts);
+  // console.log("account", accountsCollection)
   const account = await accountsCollection.findOne({ userId: id });
   return account;
 }

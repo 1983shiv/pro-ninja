@@ -7,10 +7,13 @@ import {
     getAccountsCollection,
     getUserById,
     getAccountByUserId,
+    getDb
 } from '@/drizzle/db';
+
 import { User, Account, NewAccount, newObjectId } from '@/drizzle/schema';
 import bcrypt from 'bcrypt';
-import { UserRole } from './next-auth';
+
+const db = await getDb();
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     basePath: '/api/auth',
@@ -70,12 +73,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }),
     ],
     callbacks: {
-        async signIn({ user, account, profile }) {
+        async signIn({ user, account, profile }) {            
             if (
                 account?.provider === 'google' ||
                 account?.provider === 'github'
             ) {
-                try {
+                try {                 
                     const usersCollection = await getUsersCollection();
                     const accountsCollection = await getAccountsCollection();
 
@@ -92,25 +95,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                             name: user.name || null,
                             image: user.image || null,
                             emailVerified: new Date(),
+                            isTwoFactorEnabled: false,
                             password: null,
-                            role: 'user',
+                            role: 'USER',
                             createdAt: new Date(),
                             updatedAt: new Date(),
                         };
-                        await usersCollection.insertOne(newUser);
+                        const insertResult = await usersCollection.insertOne(newUser);
                         existingUser = newUser;
                         user.id = newUser._id;
                     } else {
                         user.id = existingUser._id;
                     }
 
-                    // Check if account exists
                     const existingAccount = await accountsCollection.findOne({
                         provider: account.provider,
                         providerAccountId: account.providerAccountId,
                     });
 
                     if (!existingAccount) {
+                        
                         // Create new account
                         const newAccount: Account = {
                             _id: newObjectId(),
@@ -127,10 +131,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                             session_state:
                                 (account.session_state as string) || null,
                         };
-                        await accountsCollection.insertOne(newAccount);
-                    }
+                        
+                        const accountInsertResult = await accountsCollection.insertOne(newAccount);
+                    } 
                 } catch (error) {
-                    console.error('Error in signIn callback:', error);
                     return false;
                 }
             }
@@ -143,14 +147,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
             if (session.user) {
                 (session.user as any).id = token.id;
-                (session.user as any).role = token.role;
+                // (session.user as any).role = token.role;
+                // session.user.id = token.sub as string;
+                session.user.role = token.role as string;
+                session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
+                session.user.isOAuth = token.isOAuth as boolean;  
             }
             return session;
         },
         async jwt({ token }) {
             if (!token.sub) return token;
             const existingUser = await getUserById(token.sub);
-            console.log({ existingUser });
+            // console.log({ existingUser });
             if (!existingUser) return token;
             const existingAccount = await getAccountByUserId(existingUser._id);
 
@@ -159,13 +167,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             token.email = existingUser.email;
             token.role = existingUser.role;
             token.id = existingUser._id;
-            // token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
+            token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
             return token;
         },
-    },
+    },    
     pages: {
-        signIn: '/signin',
-        signOut: '/auth/signout',
+        signIn: '/login',
+        signOut: '/signout',
         error: '/auth/error',
     },
     session: {
