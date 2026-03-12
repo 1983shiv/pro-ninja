@@ -1,6 +1,12 @@
 import crypto from "crypto";
 import { v4 as uuidv4 } from "uuid";
 
+// Generates a license key in format: AIRS-XXXX-XXXX-XXXX-XXXX
+export const generateLicenseKey = (): string => {
+  const segment = () => crypto.randomBytes(2).toString('hex').toUpperCase();
+  return `AIRS-${segment()}-${segment()}-${segment()}-${segment()}`;
+};
+
 import { getDb } from '@/drizzle/db';
 import { 
   TwoFactorToken, 

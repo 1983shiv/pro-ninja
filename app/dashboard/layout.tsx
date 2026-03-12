@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, HelpCircle, User, Settings, LogOut, ChevronDown, Search } from 'lucide-react';
+import { Bell, HelpCircle, User, LogOut, ChevronDown, Search, LayoutDashboard, Key, Download, CreditCard, Brain } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSession, signOut } from 'next-auth/react';
@@ -66,9 +66,19 @@ export default function DashboardLayout({
       <main className="flex-1 flex flex-col h-full overflow-hidden">
         {/* Top Header */}
         <header className="h-[72px] bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
-          <div className="flex items-center text-sm text-slate-500">
-            {/* <span className="text-slate-900 font-medium">Dashboard</span> */}
+          {/* Logo — visible on mobile/tablet where sidebar is hidden */}
+          <div className="flex items-center md:hidden">
+            <Link href="/dashboard" className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white">
+                <Brain className="w-5 h-5" />
+              </div>
+              <span className="font-bold text-lg text-slate-900 tracking-tight">
+                AI ReviewSense
+              </span>
+            </Link>
           </div>
+          {/* Spacer on desktop (sidebar already shows logo) */}
+          <div className="hidden md:flex items-center text-sm text-slate-500" />
 
           <div className="flex items-center gap-6">
             {/* Search Bar */}
@@ -121,33 +131,50 @@ export default function DashboardLayout({
                 {/* Dropdown Menu */}
                 {dropdownOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-50">
+                    {/* User info */}
                     <div className="px-4 py-3 border-b border-slate-200">
                       <p className="text-sm font-medium text-slate-900">{session?.user?.name}</p>
                       <p className="text-xs text-slate-500 truncate">{session?.user?.email}</p>
                     </div>
-                    <Link
-                      href="/dashboard/profile"
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-                      onClick={() => setDropdownOpen(false)}
-                    >
-                      <User className="w-4 h-4" />
-                      Profile
-                    </Link>
-                    <Link
-                      href="/dashboard/settings"
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-                      onClick={() => setDropdownOpen(false)}
-                    >
-                      <Settings className="w-4 h-4" />
-                      Settings
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Logout
-                    </button>
+
+                    {/* Navigation */}
+                    <div className="py-1 border-b border-slate-200">
+                      <p className="px-4 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">navigate</p>
+                      <Link href="/dashboard" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors" onClick={() => setDropdownOpen(false)}>
+                        <LayoutDashboard className="w-4 h-4" />
+                        Dashboard
+                      </Link>
+                      <Link href="/dashboard/licenses" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors" onClick={() => setDropdownOpen(false)}>
+                        <Key className="w-4 h-4" />
+                        Licenses
+                      </Link>
+                      <Link href="/dashboard/downloads" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors" onClick={() => setDropdownOpen(false)}>
+                        <Download className="w-4 h-4" />
+                        Downloads
+                      </Link>
+                      <Link href="/dashboard/profile" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors" onClick={() => setDropdownOpen(false)}>
+                        <User className="w-4 h-4" />
+                        Account
+                      </Link>
+                      <Link href="/dashboard/billing" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors" onClick={() => setDropdownOpen(false)}>
+                        <CreditCard className="w-4 h-4" />
+                        Billing
+                      </Link>
+                      <Link href="/dashboard/support" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors" onClick={() => setDropdownOpen(false)}>
+                        <HelpCircle className="w-4 h-4" />
+                        Support
+                      </Link>
+                    </div>
+
+                    <div className="py-1">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Logout
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

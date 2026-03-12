@@ -5,13 +5,17 @@ import Credentials from 'next-auth/providers/credentials';
 import {
     getUsersCollection,
     getAccountsCollection,
+    getLicensesCollection,
+    getProductsCollection,
     getUserById,
     getAccountByUserId,
     getDb
 } from '@/drizzle/db';
 
-import { User, Account, NewAccount, newObjectId } from '@/drizzle/schema';
+import { User, Account, License, NewAccount, newObjectId } from '@/drizzle/schema';
 import bcrypt from 'bcrypt';
+import { generateLicenseKey } from '@/lib/tokens';
+import { sendWelcomeEmail } from '@/lib/mail';
 
 const db = await getDb();
 
@@ -97,13 +101,56 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                             emailVerified: new Date(),
                             isTwoFactorEnabled: false,
                             password: null,
-                            role: 'USER',
+                            role: 'CUSTOMER',
                             createdAt: new Date(),
                             updatedAt: new Date(),
                         };
-                        const insertResult = await usersCollection.insertOne(newUser);
+                        await usersCollection.insertOne(newUser);
                         existingUser = newUser;
                         user.id = newUser._id;
+
+                        // Generate FREE license for new OAuth user
+                        try {
+                            const productsCollection = await getProductsCollection();
+                            const freeProduct = await productsCollection.findOne({ tierType: 'FREE' });
+
+                            if (freeProduct) {
+                                const licensesCollection = await getLicensesCollection();
+                                const licenseKey = generateLicenseKey();
+                                const now = new Date();
+
+                                const newLicense: License = {
+                                    _id: newObjectId(),
+                                    licenseKey,
+                                    userId: newUser._id,
+                                    productId: freeProduct._id,
+                                    purchaseId: `free_registration_${newUser._id}`,
+                                    status: 'active',
+                                    activations: 0,
+                                    maxActivations: 1,
+                                    activatedDomains: [],
+                                    activatedAt: null,
+                                    expiresAt: null,
+                                    lastValidatedAt: null,
+                                    reviewsUsed: 0,
+                                    reviewLimit: freeProduct.reviewLimit ?? 25,
+                                    metadata: { source: 'oauth_registration', provider: account.provider },
+                                    createdAt: now,
+                                    updatedAt: now,
+                                };
+
+                                await licensesCollection.insertOne(newLicense);
+
+                                await sendWelcomeEmail(
+                                    newUser.email,
+                                    newUser.name ?? 'there',
+                                    licenseKey,
+                                );
+                            }
+                        } catch (licenseError) {
+                            // Don't block sign-in if license generation fails
+                            console.error('License generation failed for OAuth user:', licenseError);
+                        }
                     } else {
                         user.id = existingUser._id;
                     }

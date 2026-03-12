@@ -2,6 +2,7 @@ import { Resend } from "resend";
 import { VerificationEmail } from "@/components/email/verification-email";
 import { PasswordResetEmail } from "@/components/email/password-reset-email";
 import { TwoFactorEmail } from "@/components/email/two-factor-email";
+import { WelcomeEmail } from "@/components/email/welcome-email";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -40,6 +41,19 @@ export const sendVerificationEmail = async (email: string, token: string) => {
     from: "sales@optionkart.com",
     to: email,
     subject: "Verify your AI ReviewSense account",
+    html,
+  });
+  if (error) throw error;
+  return data;
+};
+
+export const sendWelcomeEmail = async (email: string, name: string, licenseKey: string) => {
+  const dashboardUrl = `${domain}/dashboard/licenses`;
+  const html = WelcomeEmail({ name, licenseKey, dashboardUrl });
+  const { data, error } = await resend.emails.send({
+    from: "sales@optionkart.com",
+    to: email,
+    subject: "Your AI ReviewSense license key is ready 🎉",
     html,
   });
   if (error) throw error;

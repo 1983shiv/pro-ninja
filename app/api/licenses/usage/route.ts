@@ -5,7 +5,9 @@ import { getLicensesCollection } from '@/drizzle/db';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { licenseKey, reviewsCount } = body;
+    // Accept both camelCase and snake_case field names
+    const licenseKey = body.licenseKey ?? body.license_key;
+    const reviewsCount = body.reviewsCount ?? body.reviews_count;
 
     if (!licenseKey || typeof reviewsCount !== 'number') {
       return NextResponse.json(

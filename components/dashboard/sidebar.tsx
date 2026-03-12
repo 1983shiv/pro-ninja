@@ -2,8 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { Brain, LayoutDashboard, Key, Download, User, CreditCard, HelpCircle, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+
+interface UsageData {
+  reviewsUsed: number;
+  reviewLimit: number;
+  plan: string;
+}
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -16,9 +23,19 @@ const navigation = [
 
 export function DashboardSidebar() {
   const pathname = usePathname();
+  const [usage, setUsage] = useState<UsageData | null>(null);
+
+  useEffect(() => {
+    fetch('/api/dashboard/usage')
+      .then((r) => r.json())
+      .then((data) => {
+        if (!data.error) setUsage(data);
+      })
+      .catch(() => {/* silently ignore */});
+  }, []);
 
   return (
-    <aside className="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0 h-full">
+    <aside className="hidden md:flex w-64 bg-white border-r border-slate-200 flex-col shrink-0 h-full">
       {/* Logo */}
       <div className="h-[72px] flex items-center px-6 border-b border-slate-100">
         <Link href="/dashboard" className="flex items-center gap-2">
@@ -57,10 +74,25 @@ export function DashboardSidebar() {
       <div className="p-4 border-t border-slate-200 bg-slate-50/50">
         <div className="mb-3 flex justify-between items-center text-xs font-medium text-slate-600">
           <span>Usage</span>
-          <span>450 / 500</span>
+          <span>
+            {usage
+              ? `${usage.reviewsUsed} / ${usage.reviewLimit > 0 ? usage.reviewLimit : '∞'}`
+              : '…'}
+          </span>
         </div>
         <div className="w-full bg-slate-200 rounded-full h-2 mb-4">
-          <div className="bg-indigo-500 h-2 rounded-full" style={{ width: '90%' }} />
+          <div
+            className={`h-2 rounded-full transition-all ${
+              usage && usage.reviewLimit > 0 && usage.reviewsUsed / usage.reviewLimit >= 0.8
+                ? 'bg-red-500'
+                : 'bg-indigo-500'
+            }`}
+            style={{
+              width: usage && usage.reviewLimit > 0
+                ? `${Math.min(100, Math.round((usage.reviewsUsed / usage.reviewLimit) * 100))}%`
+                : '0%',
+            }}
+          />
         </div>
         <Button
           className="w-full py-2 px-4 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition-colors flex items-center justify-center gap-2"

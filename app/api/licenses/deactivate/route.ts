@@ -5,7 +5,9 @@ import { getLicensesCollection } from '@/drizzle/db';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { licenseKey, domain } = body;
+    // Accept both camelCase and snake_case field names
+    const licenseKey = body.licenseKey ?? body.license_key;
+    const domain = body.domain;
 
     if (!licenseKey || !domain) {
       return NextResponse.json(

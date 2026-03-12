@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       name: name || null,
       emailVerified: null,
       image: null,
-      role: 'user',
+      role: 'USER',
       createdAt: new Date(),
       updatedAt: new Date(),
     };

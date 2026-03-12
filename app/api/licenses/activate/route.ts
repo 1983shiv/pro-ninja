@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getLicensesCollection } from '@/drizzle/db';
+import { getLicensesCollection, getProductsCollection } from '@/drizzle/db';
 
 // POST /api/licenses/activate - Activate license on a domain
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { licenseKey, domain } = body;
+    // Accept both camelCase and snake_case field names
+    const licenseKey = body.licenseKey ?? body.license_key;
+    const domain = body.domain;
 
     if (!licenseKey || !domain) {
       return NextResponse.json(
@@ -59,11 +61,22 @@ export async function POST(request: NextRequest) {
       }
     );
 
+    // Fetch product for plan details
+    const productsCollection = await getProductsCollection();
+    const product = await productsCollection.findOne({ _id: license.productId });
+
     return NextResponse.json({
       success: true,
       message: 'License activated successfully',
-      activations: license.activations + 1,
-      maxActivations: license.maxActivations,
+      data: {
+        status: license.status,
+        plan: product?.tierType ?? 'FREE',
+        expires_at: license.expiresAt ?? null,
+        review_limit: license.reviewLimit,
+        site_limit: product?.siteLimit ?? 1,
+        activations: license.activations + 1,
+        max_activations: license.maxActivations,
+      },
     });
   } catch (error) {
     console.error('Error activating license:', error);

@@ -208,6 +208,31 @@ export interface AuditLog {
 }
 
 // ============================================
+// SUPPORT TICKETS
+// ============================================
+
+export interface SupportTicket {
+  _id: string;
+  ticketNumber: string;
+  userId: string;
+  subject: string;
+  category: 'technical' | 'billing' | 'feature' | 'other';
+  status: 'open' | 'in_progress' | 'resolved' | 'closed';
+  priority: 'low' | 'medium' | 'high';
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface TicketMessage {
+  _id: string;
+  ticketId: string;
+  senderId: string;
+  senderRole: 'customer' | 'admin';
+  message: string;
+  createdAt: Date;
+}
+
+// ============================================
 // zod based schema and validations
 // ============================================
 
@@ -289,6 +314,21 @@ export const RegisterSchema = z.object({
   }),
 });
 
+export const CreateTicketSchema = z.object({
+  subject: z.string().min(5, "Subject must be at least 5 characters"),
+  category: z.enum(['technical', 'billing', 'feature', 'other']),
+  message: z.string().min(20, "Please describe your issue in at least 20 characters"),
+});
+
+export const AddReplySchema = z.object({
+  message: z.string().min(1, "Reply cannot be empty"),
+});
+
+export const UpdateTicketSchema = z.object({
+  status: z.enum(['open', 'in_progress', 'resolved', 'closed']).optional(),
+  priority: z.enum(['low', 'medium', 'high']).optional(),
+});
+
 
 // ============================================
 // COLLECTION NAMES
@@ -309,6 +349,8 @@ export const collections = {
   downloads: 'downloads',
   notifications: 'notifications',
   auditLogs: 'audit_logs',
+  supportTickets: 'support_tickets',
+  ticketMessages: 'ticket_messages',
 } as const;
 
 
@@ -328,3 +370,5 @@ export type NewPurchase = Omit<Purchase, '_id' | 'createdAt' | 'updatedAt'>;
 export type NewLicense = Omit<License, '_id' | 'createdAt' | 'updatedAt'>;
 export type NewDownload = Omit<Download, '_id' | 'downloadedAt'>;
 export type NewNotification = Omit<Notification, '_id' | 'createdAt'>;
+export type NewSupportTicket = Omit<SupportTicket, '_id' | 'createdAt' | 'updatedAt'>;
+export type NewTicketMessage = Omit<TicketMessage, '_id' | 'createdAt'>;

@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (session.user.role !== 'admin') {
+    if (session.user.role !== 'ADMIN') {
       return NextResponse.json(
         { error: 'Forbidden - Admin access only' },
         { status: 403 }

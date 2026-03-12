@@ -7,7 +7,9 @@ import { v4 as uuidv4 } from 'uuid';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { licenseKey, domain } = body;
+    // Accept both camelCase and snake_case field names
+    const licenseKey = body.licenseKey ?? body.license_key;
+    const domain = body.domain;
 
     if (!licenseKey) {
       return NextResponse.json({ error: 'License key required' }, { status: 400 });
@@ -40,7 +42,7 @@ export async function POST(request: NextRequest) {
       );
 
       return NextResponse.json({
-        valid: false,
+        success: false,
         error: 'License has expired',
       }, { status: 403 });
     }
@@ -56,17 +58,16 @@ export async function POST(request: NextRequest) {
     const product = await productsCollection.findOne({ _id: license.productId });
 
     return NextResponse.json({
-      valid: true,
-      license: {
-        key: license.licenseKey,
+      success: true,
+      data: {
         status: license.status,
-        plan: product?.tierType,
-        reviewLimit: license.reviewLimit,
-        reviewsUsed: license.reviewsUsed,
-        siteLimit: product?.siteLimit,
+        plan: product?.tierType ?? 'FREE',
+        expires_at: license.expiresAt ?? null,
+        review_limit: license.reviewLimit,
+        reviews_used: license.reviewsUsed,
+        site_limit: product?.siteLimit ?? 1,
         activations: license.activations,
-        maxActivations: license.maxActivations,
-        expiresAt: license.expiresAt,
+        max_activations: license.maxActivations,
       },
     });
   } catch (error) {

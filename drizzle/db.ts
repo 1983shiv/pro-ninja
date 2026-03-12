@@ -7,6 +7,8 @@ import {
   License,
   Download,
   Notification,
+  SupportTicket,
+  TicketMessage,
   collections
 } from './schema';
 
@@ -140,6 +142,16 @@ export async function getDownloadsCollection(): Promise<Collection<Download>> {
 export async function getNotificationsCollection(): Promise<Collection<Notification>> {
   const db = await getDb();
   return db.collection<Notification>(collections.notifications);
+}
+
+export async function getTicketsCollection(): Promise<Collection<SupportTicket>> {
+  const db = await getDb();
+  return db.collection<SupportTicket>(collections.supportTickets);
+}
+
+export async function getTicketMessagesCollection(): Promise<Collection<TicketMessage>> {
+  const db = await getDb();
+  return db.collection<TicketMessage>(collections.ticketMessages);
 }
 
 // Helper to create indexes (run once during setup)
